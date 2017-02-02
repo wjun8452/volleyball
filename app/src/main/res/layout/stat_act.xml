@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/colorPrimary"
+                android:minHeight="?attr/actionBarSize"
+                android:theme="@style/Toolbar"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+        </android.support.design.widget.AppBarLayout>
+
+        <LinearLayout
+            android:id="@+id/contentFrame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0px"
+                android:layout_weight="2">
+
+                <TextView
+                    android:id="@+id/status"
+                    android:paddingLeft="2dp"
+                    android:layout_width="0px"
+                    android:layout_height="match_parent"
+                    android:layout_weight="5"
+                    android:layout_gravity="center"
+                    android:gravity="start"
+                    android:textAlignment="textStart" />
+
+                <TextView
+                    android:textColor="?android:attr/colorFocusedHighlight"
+                    android:id="@+id/my_score"
+                    android:layout_width="0px"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="10"
+                    android:gravity="end"
+                    android:textSize="24sp"
+                    android:textStyle="normal|bold"
+                    android:textAlignment="textEnd" />
+
+                <TextView
+                    android:textColor="?android:attr/colorFocusedHighlight"
+                    android:layout_width="0px"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text=":"
+                    android:textSize="24sp"
+                    android:textStyle="normal|bold"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:textColor="?android:attr/colorFocusedHighlight"
+                    android:id="@+id/your_score"
+                    android:layout_width="0px"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="13"
+                    android:gravity="start"
+                    android:textSize="24sp"
+                    android:textStyle="normal|bold"
+                    android:textAlignment="textStart" />
+
+                <TextView
+                    android:id="@+id/createdTime"
+                    android:paddingRight="2dp"
+                    android:layout_width="0px"
+                    android:layout_height="match_parent"
+                    android:layout_weight="5"
+                    android:layout_gravity="center"
+                    android:gravity="end"
+                    android:textAlignment="textEnd" />
+
+            </LinearLayout>
+
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0px"
+                android:layout_weight="4"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/competitor_error"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:text="对方失误" />
+
+                <Button
+                    android:id="@+id/self_error"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:text="我方失误" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0px"
+                android:layout_weight="20"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:id="@+id/pos4"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_marginRight="2dp"
+                    android:layout_height="match_parent"></FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/pos3"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_marginRight="2dp"
+                    android:layout_marginLeft="2dp"
+                    android:layout_height="match_parent"></FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/pos2"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="2dp"
+                    android:layout_height="match_parent"></FrameLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0px"
+                android:layout_weight="20"
+                android:layout_marginTop="5dp"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:id="@+id/pos5"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_marginRight="2dp"
+                    android:layout_height="match_parent"></FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/pos6"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_marginRight="2dp"
+                    android:layout_marginLeft="2dp"
+                    android:layout_height="match_parent"></FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/pos1"
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="2dp"
+                    android:layout_height="match_parent"></FrameLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/drawer_actions" />
+
+</LinearLayout>

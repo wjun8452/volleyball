@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">我爱排球</string>
+
+    <item name="tag_player_viewholder" type="id"></item>
+    <item name="tag_player_data" type="id"></item>
+
+    <string name="title_activity_stats">比赛场次</string>
+    <string name="title_activity_report">技术统计</string>
+    <string name="title_activity_stat">记分板</string>
+    <string name="title_activity_prepare">赛场准备</string>
+    <string name="title_activity_players">球队成员</string>
+
+    <string name="faqiu">发球</string>
+    <string name="lanwang">拦网</string>
+    <string name="jingong">进攻</string>
+    <string name="yichuan">一传</string>
+    <string name="fangshou">防守</string>
+    <string name="title_activity_sync">SyncActivity</string>
+
+</resources>

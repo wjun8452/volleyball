@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:id="@+id/content_report"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.junwang.volleyball.report.ReportActivityFragment"
+    tools:showIn="@layout/report_act">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:layout_gravity="center"
+            android:gravity="start"
+            android:textAlignment="textStart" />
+
+        <TextView
+            android:textColor="?android:attr/colorFocusedHighlight"
+            android:id="@+id/my_score"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="10"
+            android:gravity="end"
+            android:textSize="24sp"
+            android:textStyle="normal|bold"
+            android:textAlignment="textEnd" />
+
+        <TextView
+            android:textColor="?android:attr/colorFocusedHighlight"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text=":"
+            android:gravity="center"
+            android:textSize="24sp"
+            android:textStyle="normal|bold"
+            android:textAlignment="center" />
+
+        <TextView
+            android:textColor="?android:attr/colorFocusedHighlight"
+            android:id="@+id/your_score"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="13"
+            android:gravity="start"
+            android:textSize="24sp"
+            android:textStyle="normal|bold"
+            android:textAlignment="textStart" />
+
+        <TextView
+            android:id="@+id/createdTime"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:gravity="end"
+            android:textAlignment="textEnd" />
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/listview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </ListView>
+
+
+</LinearLayout>
