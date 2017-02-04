@@ -14,13 +14,13 @@ import java.util.List;
 
 public interface StatsContract {
     interface View extends BaseView<Presenter> {
-        void showCourts(List<Court> courtList);
+        void showCourts(final List<Court> courtList);
         void showNoCourt();
         void showAddCourt();
     }
 
     interface Presenter extends BasePresenter {
-        void loadStats();
+        void loadStats(boolean fetchServer);
         void addNewStats();
         void deleteStat(Court court);
     }

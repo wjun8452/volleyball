@@ -1,17 +1,20 @@
 package com.junwang.volleyball.stats;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.baoyz.swipemenulistview.SwipeMenu;
 import com.baoyz.swipemenulistview.SwipeMenuCreator;
@@ -19,6 +22,7 @@ import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.junwang.volleyball.R;
 import com.junwang.volleyball.model.Court;
+import com.junwang.volleyball.model.CourtStatus;
 import com.junwang.volleyball.prepare.PrepareActivity;
 import com.junwang.volleyball.report.ReportActivity;
 import com.junwang.volleyball.stat.StatActivity;
@@ -96,7 +100,13 @@ public class StatsActivityFragment extends Fragment implements StatsContract.Vie
                 switch (index) {
                     case 0:
                         // delete
-                        presenter.deleteStat((Court) adapter.getItem(position));
+                        Court court = (Court) adapter.getItem(position);
+                        if (court.getStatus().equals(CourtStatus.Not_Started) ||
+                                court.getStatus().equals(CourtStatus.Started)) {
+                            presenter.deleteStat(court);
+                        } else {
+                            Toast.makeText(getActivity(), "已结束的赛事暂不支持删除操作！", Toast.LENGTH_LONG).show();
+                        }
                         break;
                 }
                 // false : close the menu; true : not close the menu
@@ -106,22 +116,51 @@ public class StatsActivityFragment extends Fragment implements StatsContract.Vie
 
         listView.setOnItemClickListener(this);
 
+
+        //swipe refresh layout
+        //swipe refresh
+        SwipeRefreshLayout layout = (SwipeRefreshLayout)view.findViewById(R.id.refresh_layout);
+        layout.setEnabled(true);
+        layout.setRefreshing(true);
+        layout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                presenter.loadStats(true);
+            }
+        });
+
         root = view;
 
         return view;
     }
 
     @Override
-    public void showCourts(List<Court> courtList) {
-        root.findViewById(R.id.no_stats).setVisibility(View.GONE);
-        root.findViewById(R.id.listview_stats).setVisibility(View.VISIBLE);
-        adapter.replaceData(courtList);
+    public void showCourts(final List<Court> courtList) {
+        Activity activity = getActivity();
+        if (activity == null) return;
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ((SwipeRefreshLayout)root.findViewById(R.id.refresh_layout)).setRefreshing(false);
+                root.findViewById(R.id.no_stats).setVisibility(View.GONE);
+                root.findViewById(R.id.listview_stats).setVisibility(View.VISIBLE);
+                adapter.replaceData(courtList);
+            }
+        });
     }
 
     @Override
     public void showNoCourt() {
-        root.findViewById(R.id.no_stats).setVisibility(View.VISIBLE);
-        root.findViewById(R.id.listview_stats).setVisibility(View.GONE);
+        Activity activity = getActivity();
+        if (activity == null) return;
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ((SwipeRefreshLayout)root.findViewById(R.id.refresh_layout)).setRefreshing(false);
+                root.findViewById(R.id.no_stats).setVisibility(View.VISIBLE);
+                root.findViewById(R.id.listview_stats).setVisibility(View.GONE);
+            }
+        });
     }
 
     @Override

@@ -2,8 +2,10 @@ package com.junwang.volleyball.stats;
 
 import android.content.Context;
 
+import com.junwang.volleyball.model.CourtStatus;
 import com.junwang.volleyball.model.ModelRepoFactory;
 import com.junwang.volleyball.model.Court;
+import com.junwang.volleyball.model.ModelRepository;
 
 import java.util.List;
 
@@ -14,6 +16,7 @@ import java.util.List;
 public class StatsPresenter implements StatsContract.Presenter {
     StatsContract.View view;
     Context context;
+    private boolean firstTime = true;
 
     public StatsPresenter(Context context, StatsContract.View view) {
         this.view = view;
@@ -23,7 +26,13 @@ public class StatsPresenter implements StatsContract.Presenter {
 
     @Override
     public void start() {
-        loadStats();
+        ModelRepoFactory.getModelRepo().init(context);
+        if (firstTime) {
+            loadStats(true);
+        } else {
+            loadStats(false);
+        }
+        firstTime = false;
     }
 
     @Override
@@ -32,13 +41,17 @@ public class StatsPresenter implements StatsContract.Presenter {
     }
 
     @Override
-    public void loadStats() {
-        List<Court> courts = load();
-        if (courts!=null && (!courts.isEmpty())) {
-            view.showCourts(courts);
-        } else {
-            view.showNoCourt();
-        }
+    public void loadStats(final boolean fetchServer) {
+        ModelRepoFactory.getModelRepo().loadCourt(fetchServer, context, new ModelRepository.LoadCourtCallback() {
+            @Override
+            public void onCourtLoaded(List<Court> courts) {
+                if (courts!=null && (!courts.isEmpty())) {
+                    view.showCourts(courts);
+                } else {
+                    view.showNoCourt();
+                }
+            }
+        });
     }
 
     @Override
@@ -49,10 +62,7 @@ public class StatsPresenter implements StatsContract.Presenter {
     @Override
     public void deleteStat(Court court) {
         ModelRepoFactory.getModelRepo().deleteCourt(context, court.getId());
-        loadStats();
-    }
+        loadStats(true);
 
-    private List<Court> load() {
-        return ModelRepoFactory.getModelRepo().loadCourt(context);
     }
 }

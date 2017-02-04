@@ -17,10 +17,6 @@ public class Player implements Parcelable {
         this.name = name;
     }
 
-    public Player(String name, boolean inGame) {
-        this.name = name;
-    }
-
     protected Player(Parcel in) {
         setName(in.readString());
     }

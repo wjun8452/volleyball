@@ -9,12 +9,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
+import java.util.UUID;
 
 /**
  * Created by junwang on 19/01/2017.
  */
 
 public class VolCourt implements Court {
+    private UUID id =  UUID.randomUUID();
     private CourtStatus status = CourtStatus.Not_Started;
     private int yourScore;
     private int myScore;
@@ -24,7 +26,7 @@ public class VolCourt implements Court {
     private Stack<StatItem> stats = new Stack<>();
     private transient Stack<StatItem> undo = new Stack<>();
     private transient Set<CourtListener> listeners = new HashSet<>();
-    private Date date = new Date();
+    private long date = new Date().getTime();
 
     @Override
     public boolean addPlayer(int position, Player player) {
@@ -41,12 +43,12 @@ public class VolCourt implements Court {
 
     @Override
     public String getId() {
-        return getCreatedTime().toString();
+        return id.toString();
     }
 
     @Override
     public Date getCreatedTime() {
-        return date;
+        return new Date(date);
     }
 
     @Override

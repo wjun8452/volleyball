@@ -13,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.Toast;
 
 import com.junwang.volleyball.R;
 import com.junwang.volleyball.model.ModelRepoFactory;
@@ -154,9 +155,6 @@ public class PrepareActivity extends AppCompatActivity implements PrepareContrac
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_delete:
-                presenter.delete();
-                break;
         }
         return super.onOptionsItemSelected(item);
     }

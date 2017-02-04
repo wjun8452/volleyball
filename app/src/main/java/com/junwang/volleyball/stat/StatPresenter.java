@@ -8,6 +8,7 @@ import com.junwang.volleyball.model.CourtListener;
 import com.junwang.volleyball.model.CourtStatus;
 import com.junwang.volleyball.model.PlayItem;
 import com.junwang.volleyball.model.Player;
+import com.junwang.volleyball.model.Sync;
 
 import java.util.Set;
 
@@ -31,7 +32,7 @@ public class StatPresenter implements StatContract.Presenter, CourtListener {
 
     @Override
     public String getCourtId() {
-        return court.getCreatedTime().toString();
+        return court.getId();
     }
 
     @Override
@@ -107,6 +108,17 @@ public class StatPresenter implements StatContract.Presenter, CourtListener {
     @Override
     public void statusChanged(CourtStatus status) {
         view.updateCourtStatus(status);
+        if (status.equals(CourtStatus.Win) ||
+                status.equals(CourtStatus.Lost))
+        {
+            ModelRepoFactory.getModelRepo().markSyncAdded(context, court);
+            Sync.getInstance(context).getLocalCache().remove(court.getId());
+            Sync.getInstance(context).startSyncCourts(new Sync.SyncCourtsListener() {
+                @Override
+                public void done() {
+                }
+            });
+        }
     }
 
     @Override

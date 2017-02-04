@@ -30,10 +30,6 @@
             android:id="@+id/menu_redo"
             android:title="重做"
             app:showAsAction="never" />
-        <item
-            android:id="@+id/menu_delete"
-            android:title="删除"
-            app:showAsAction="always" />
 
         <item
             android:id="@+id/menu_report"

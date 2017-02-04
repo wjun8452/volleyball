@@ -1,5 +1,7 @@
 package com.junwang.volleyball.model;
 
+import android.content.Context;
+
 import com.junwang.volleyball.model.ModelRepoImpl;
 import com.junwang.volleyball.model.ModelRepository;
 
@@ -8,8 +10,11 @@ import com.junwang.volleyball.model.ModelRepository;
  */
 
 public class ModelRepoFactory {
-    private static ModelRepository repository = new ModelRepoImpl();
+    private static ModelRepository repository;
     static public ModelRepository getModelRepo() {
+        if (repository == null) {
+            repository = new ModelRepoImpl();
+        }
         return repository;
     }
 }

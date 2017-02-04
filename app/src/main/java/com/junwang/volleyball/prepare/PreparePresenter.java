@@ -6,7 +6,7 @@ import com.junwang.volleyball.model.ModelRepoFactory;
 import com.junwang.volleyball.model.Court;
 import com.junwang.volleyball.model.CourtStatus;
 import com.junwang.volleyball.model.Player;
-import com.junwang.volleyball.model.VolCourt;
+import com.junwang.volleyball.model.Sync;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +58,7 @@ public class PreparePresenter implements  PrepareContract.Presenter {
     public void loadCourt() {
         if (court == null) {
             court = ModelRepoFactory.getModelRepo().newCourt(context);
+            Sync.getInstance(context).getLocalCache().add(court.getId());
             ModelRepoFactory.getModelRepo().saveCourt(context, court);
         }
         view.showCourt(court.getPlayers(), court.getStatus().equals(CourtStatus.Started), court.isFaqiulun());
@@ -66,7 +67,7 @@ public class PreparePresenter implements  PrepareContract.Presenter {
     @Override
     public List<PlayerInfo> getPlayerCandidates() {
         List<PlayerInfo> list = new ArrayList<>();
-        for (Player player : ModelRepoFactory.getModelRepo().loadPlayers(context)) {
+        for (Player player : ModelRepoFactory.getModelRepo().loadLocalPlayers(context)) {
             list.add(new PlayerInfo(player, false));
         }
 
@@ -85,6 +86,7 @@ public class PreparePresenter implements  PrepareContract.Presenter {
     @Override
     public void delete() {
         ModelRepoFactory.getModelRepo().deleteCourt(context, court.getId());
+        Sync.getInstance(context).getLocalCache().remove(court.getId());
         view.finish();
     }
 

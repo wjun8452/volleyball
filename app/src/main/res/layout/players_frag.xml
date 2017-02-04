@@ -5,11 +5,17 @@
     android:layout_margin="20dp"
     android:orientation="vertical">
 
-    <com.baoyz.swipemenulistview.SwipeMenuListView
-        android:id="@+id/listview_players"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></com.baoyz.swipemenulistview.SwipeMenuListView>
+        android:layout_height="match_parent">
 
+        <com.baoyz.swipemenulistview.SwipeMenuListView
+            android:id="@+id/listview_players"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></com.baoyz.swipemenulistview.SwipeMenuListView>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <TextView
         android:id="@+id/no_player_info"

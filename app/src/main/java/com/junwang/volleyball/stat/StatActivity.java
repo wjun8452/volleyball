@@ -212,9 +212,6 @@ public class StatActivity extends AppCompatActivity implements View.OnClickListe
                 intent.putExtra(PrepareActivity.KEY_STAT_ID, presenter.getCourtId());
                 startActivityForResult(intent, 100);
                 break;
-            case R.id.menu_delete:
-                presenter.delete();
-                break;
             case R.id.menu_report:
                 intent = new Intent(StatActivity.this, ReportActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);

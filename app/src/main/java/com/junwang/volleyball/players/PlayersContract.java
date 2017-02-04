@@ -18,7 +18,7 @@ public interface PlayersContract {
     }
 
     interface Presenter extends BasePresenter {
-        void loadPlayers();
+        void loadPlayers(boolean fetchServer);
         void addPlayer(Player player);
         void deletePlayer(Player player);
     }

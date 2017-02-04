@@ -88,14 +88,6 @@ public class StatFragment extends android.support.v4.app.Fragment implements Vie
         if (availablePositives != null) {
             this.availablePositives = availablePositives;
         }
-
-//        if (net > 0) {
-//            view.setBackgroundResource(R.drawable.corner_green);
-//        } else if (net < 0) {
-//            view.setBackgroundResource(R.drawable.corner_red);
-//        } else {
-//            view.setBackgroundResource(R.drawable.corner);
-//        }
     }
 
 

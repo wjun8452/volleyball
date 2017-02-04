@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.junwang.volleyball.util.FileNameUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,8 +14,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by junwang on 28/01/2017.
@@ -23,75 +26,128 @@ import java.util.Map;
 public class ModelRepoImpl implements ModelRepository {
     private Map<String, Court> courtMap = new HashMap<>();
     private Map<String, Player> playerMap = new HashMap<>();
+    private Context context;
+
+    public ModelRepoImpl() {
+        this.context = context;
+    }
+
+    private void createStatsDirIfNeeded(boolean court, Context context) {
+        String statsDir = FileNameUtil.getStatsLocalDir(court, context);
+        File file = new File(statsDir);
+        if (!file.exists()) {
+            file.mkdir();
+        }
+    }
+
+
+    @Override
+    public void init(Context context) {
+        createStatsDirIfNeeded(true, context);
+        createStatsDirIfNeeded(false, context);
+    }
 
     @Override
     public void saveCourt(Context context, Court court) {
         boolean saved = true;
+        FileOutputStream outputStream = null;
         try {
-            FileOutputStream outputStream = context.openFileOutput(getCourtFileName(court.getId()), Context.MODE_PRIVATE);
             Gson gson = new Gson();
             String json = gson.toJson(court);
-            Log.i("wangjun-out", json);
-            outputStream.write(json.getBytes());
-            outputStream.close();
+            Log.i("wangjun", "save to file: " + json);
+
+            synchronized (this) {
+                outputStream = new FileOutputStream(FileNameUtil.createLocalStatFile(true, context, court.getId()));//context.openFileOutput(FileNameUtil.getStatRelativePath(court.getId()), Context.MODE_PRIVATE);outputStream.write(json.getBytes());
+                outputStream.write(json.getBytes());
+                outputStream.close();
+            }
+
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            Log.e("wangjun", "save file fail", e);
             saved = false;
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("wangjun", "save file fail", e);
+            saved = false;
+        } catch (Exception e) {
+            Log.e("wangjun", "save file fail", e);
             saved = false;
         } finally {
-
+            try {
+                if (outputStream != null)
+                    outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Log.i("wangjun", "save to file done");
         }
 
         if (saved) {
-            //if (courtMap.containsKey(court.getId())) {
-                courtMap.put(court.getId(), court);
-            //}
+            courtMap.put(court.getId(), court);
         }
     }
 
     @Override
-    public List<Court> loadCourt(Context context) {
-        List<Court> courtList = new ArrayList<>();
+    public void markSyncAdded(Context context, Court court) {
+        Sync.getInstance(context).getUnsyncedDelete().remove(court.getId());
+        Sync.getInstance(context).getUnsyncedAdd().add(court.getId());
+        Sync.getInstance(context).saveUnsyncCourts();
+    }
+
+    public List<Court> loadLocalCourts(Context context) {
+
+        List<com.junwang.volleyball.model.Court> courtList = new ArrayList<>();
         if (courtMap.size() != 0) {
-            for (Court court : courtMap.values()) {
+            for (com.junwang.volleyball.model.Court court : courtMap.values()) {
                 courtList.add(court);
             }
+
         } else {
-
-            List<String> courts = new ArrayList<>();
-            File file = context.getFilesDir();
-            for (File f : file.listFiles()) {
-                if (f.isFile()) {
-                    String extend = f.getName().substring(f.getName().lastIndexOf(".") + 1);
-                    if (extend.equals("court")) {
-                        courts.add(f.getName());
-                    }
-                }
-            }
-
-            for (String filename : courts) {
+            Set<String> localCouts = listLocalCouts(true, context);
+            Log.i("wangjun", "load courts from local, total:  " + localCouts.size());
+            for (String filename : localCouts) {
                 try {
-                    FileInputStream inputStream = context.openFileInput(filename);
+                    Log.i("wangjun", filename);
+                    FileInputStream inputStream = new FileInputStream(new File(FileNameUtil.getStatsLocalDir(true, context) + "/" + filename));
                     byte[] all = new byte[inputStream.available()];
                     inputStream.read(all);
                     inputStream.close();
                     String json = new String(all);
-                    Log.i("wangjun-read", json);
+                    Log.d("wangjun", json);
                     Gson gson = new Gson();
-                    Court court = gson.fromJson(json, VolCourt.class);
-                    courtList.add(court);
-                    courtMap.put(court.getId(), court);
+                    com.junwang.volleyball.model.Court court = gson.fromJson(json, VolCourt.class);
+                    if (court != null) {
+                        courtList.add(court);
+                        courtMap.put(court.getId(), court);
+                    }
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    Log.e("wangjun", filename, e);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e("wangjun", filename, e);
+                } catch (Exception e) {
+                    Log.e("wangjun", filename, e);
                 }
             }
         }
+
         sortCourt(courtList);
+
         return courtList;
+    }
+
+    @Override
+    public void loadCourt(boolean fetechServer, final Context context, final LoadCourtCallback courtCallback) {
+
+        if (fetechServer) {
+            Sync.getInstance(context).startSyncCourts(new Sync.SyncCourtsListener() {
+                @Override
+                public void done() {
+                    courtMap.clear();
+                    courtCallback.onCourtLoaded(loadLocalCourts(context));
+                }
+            });
+        } else {
+            courtCallback.onCourtLoaded(loadLocalCourts(context));
+        }
     }
 
     private void sortCourt(List<Court> courts) {
@@ -118,46 +174,81 @@ public class ModelRepoImpl implements ModelRepository {
 
     @Override
     public void deleteCourt(Context context, String id) {
-        if (context.deleteFile(getCourtFileName(id))) {
+        if (FileNameUtil.createLocalStatFile(true, context, id).delete()) {
+            Log.i("wangjun", "delete court and save to unsynced, court= " + id);
             courtMap.remove(id);
+            Sync.getInstance(context).getUnsyncedAdd().remove(id);
+            Sync.getInstance(context).getUnsyncedDelete().add(id);
+            Sync.getInstance(context).saveUnsyncCourts();
+        } else {
+            Log.i("wangjun", "delete local court fail. court=" + id);
         }
     }
 
     @Override
-    public List<Player> loadPlayers(Context context) {
+    public Set<String> listLocalCouts(boolean court, Context context) {
+        Set<String> courts = new HashSet<>();
+        File file = new File(FileNameUtil.getStatsLocalDir(court, context));
+        for (File f : file.listFiles()) {
+            if (f.isFile()) {
+                courts.add(f.getName());
+            }
+        }
+        return courts;
+    }
+
+
+    @Override
+    public void loadPlayers(boolean fetchServer, final Context context, final LoadPlayerCallback playerCallback) {
+        if (fetchServer) {
+            Sync.getInstance(context).startSyncPlayers(new Sync.SyncPlayersListener() {
+                @Override
+                public void done() {
+                    playerMap.clear();
+                    playerCallback.onPlayerLoaded(loadLocalPlayers(context));
+                }
+            });
+        } else {
+            playerCallback.onPlayerLoaded(loadLocalPlayers(context));
+        }
+    }
+
+    @Override
+    public List<Player> loadLocalPlayers(Context context) {
         List<Player> playerList = new ArrayList<>();
         if (playerMap.size() != 0) {//use cached
+            Log.i("wangjun", "load memory players, count: " + playerMap.size());
             for (Player player : playerMap.values()) {
                 playerList.add(player);
             }
         } else {
-
-            List<String> players = new ArrayList<>();
-            File file = context.getFilesDir();
-            for (File f : file.listFiles()) {
-                if (f.isFile()) {
-                    String extend = f.getName().substring(f.getName().lastIndexOf(".") + 1);
-                    if (extend.equals("player")) {
-                        players.add(f.getName());
-                    }
-                }
-            }
-
+            Set<String> players = listLocalCouts(false, context);
+            Log.i("wangjun", "load local players, count: " + players.size());
             for (String filename : players) {
                 try {
-                    FileInputStream inputStream = context.openFileInput(filename);
+                    FileInputStream inputStream = new FileInputStream(new File(FileNameUtil.getStatsLocalDir(false, context) + "/" + filename));
                     byte[] all = new byte[inputStream.available()];
                     inputStream.read(all);
                     inputStream.close();
                     String json = new String(all);
+
+                    Log.i("wangjun", json);
+
                     Gson gson = new Gson();
+
                     Player player = gson.fromJson(json, Player.class);
-                    playerList.add(player);
-                    playerMap.put(player.getName(), player);
+
+                    if (player != null) {
+                        playerList.add(player);
+                        playerMap.put(player.getName(), player);
+                    }
+
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    Log.e("wangjun", "", e);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e("wangjun", "", e);
+                } catch (Exception e) {
+                    Log.e("wangjun", "", e);
                 }
             }
         }
@@ -167,8 +258,15 @@ public class ModelRepoImpl implements ModelRepository {
 
     @Override
     public void deletePlayer(Context context, String id) {
-        if (context.deleteFile(getPlayerFileName(id))) {
+        File file = FileNameUtil.createLocalStatFile(false, context, id);
+        if (file.delete()) {
+            Log.i("wangjun", "delete local player and save to unsynced, player= " + id);
             playerMap.remove(id);
+            Sync.getInstance(context).getUnsyncedDeletePlayer().add(id);
+            Sync.getInstance(context).getUnsyncedAddPlayer().remove(id);
+            Sync.getInstance(context).saveUnsyncPlayers();
+        } else {
+            Log.i("wangjun", "delete local player failed, player= " + id);
         }
     }
 
@@ -176,18 +274,20 @@ public class ModelRepoImpl implements ModelRepository {
     public void savePlayer(Context context, Player player) {
         boolean saved = true;
         try {
-            FileOutputStream outputStream = context.openFileOutput(getPlayerFileName(player.getName()), Context.MODE_PRIVATE);
+            FileOutputStream outputStream = new FileOutputStream(FileNameUtil.createLocalStatFile(false, context, player.getName()));
             Gson gson = new Gson();
             String json = gson.toJson(player);
             outputStream.write(json.getBytes());
             outputStream.close();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            Log.e("wangjun", "", e);
             saved = false;
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("wangjun", "", e);
             saved = false;
-        } finally {
+        } catch (Exception e) {
+            Log.e("wangjun", "", e);
+            saved = false;
         }
 
         if (saved) {
@@ -195,12 +295,11 @@ public class ModelRepoImpl implements ModelRepository {
         }
     }
 
-    private String getCourtFileName(String id) {
-        return id + ".court";
-    }
+    @Override
+    public void markSyncAdded(Context context, Player player) {
+        Sync.getInstance(context).getUnsyncedAddPlayer().add(player.getName());
+        Sync.getInstance(context).getUnsyncedDeletePlayer().remove(player.getName());
+        Sync.getInstance(context).saveUnsyncPlayers();
 
-    private String getPlayerFileName(String id) {
-        return id + ".player";
     }
-
 }

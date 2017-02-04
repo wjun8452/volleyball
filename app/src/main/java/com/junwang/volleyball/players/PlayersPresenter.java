@@ -3,6 +3,7 @@ package com.junwang.volleyball.players;
 import android.content.Context;
 
 import com.junwang.volleyball.model.ModelRepoFactory;
+import com.junwang.volleyball.model.ModelRepository;
 import com.junwang.volleyball.model.Player;
 
 import java.util.List;
@@ -15,6 +16,7 @@ public class PlayersPresenter implements PlayersContract.Presenter {
 
     private PlayersContract.View view;
     private Context context;
+    private boolean firstTime = true;
 
     PlayersPresenter(Context context, PlayersContract.View view) {
         this.context = context;
@@ -23,31 +25,42 @@ public class PlayersPresenter implements PlayersContract.Presenter {
     }
 
     @Override
-    public void loadPlayers() {
-        List<Player> playerList = ModelRepoFactory.getModelRepo().loadPlayers(context);
-        if (playerList!=null && (!playerList.isEmpty())) {
-            view.showPlayers(playerList);
-        } else {
-            view.showNoPlayer();
-        }
+    public void loadPlayers(final boolean fetchServer) {
+        ModelRepoFactory.getModelRepo().loadPlayers(fetchServer, context,
+                new ModelRepository.LoadPlayerCallback() {
+                    @Override
+                    public void onPlayerLoaded(List<Player> players) {
+                        if (players!=null && (!players.isEmpty())) {
+                            view.showPlayers(players);
+                        } else {
+                            view.showNoPlayer();
+                        }
+                    }
+                });
     }
 
     @Override
     public void addPlayer(Player player) {
         ModelRepoFactory.getModelRepo().savePlayer(context, player);
-        loadPlayers();
+        ModelRepoFactory.getModelRepo().markSyncAdded(context, player);
+        loadPlayers(true);
     }
 
     @Override
     public void deletePlayer(Player player) {
         ModelRepoFactory.getModelRepo().deletePlayer(context, player.getName());
-        loadPlayers();
+        loadPlayers(true);
     }
 
 
     @Override
     public void start() {
-        loadPlayers();
+        if (firstTime) {
+            loadPlayers(true);
+        } else {
+            loadPlayers(false);
+        }
+        firstTime = false;
     }
 
     @Override

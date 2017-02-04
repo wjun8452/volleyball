@@ -3,23 +3,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="20dp"
-    android:orientation="vertical"
-    >
+    android:orientation="vertical">
 
-    <com.baoyz.swipemenulistview.SwipeMenuListView
-        android:id="@+id/listview_stats"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    </com.baoyz.swipemenulistview.SwipeMenuListView>
 
+        <com.baoyz.swipemenulistview.SwipeMenuListView
+            android:id="@+id/listview_stats"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></com.baoyz.swipemenulistview.SwipeMenuListView>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <TextView
         android:id="@+id/no_stats"
-        android:gravity="center"
-        android:textAlignment="center"
-        android:text="亲，没有记录哦～，点击+号可添加比赛！"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="亲，没有记录哦～，点击+号可添加比赛！"
+        android:textAlignment="center" />
 
 
 </LinearLayout>

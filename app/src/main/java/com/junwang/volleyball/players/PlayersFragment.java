@@ -1,11 +1,13 @@
 package com.junwang.volleyball.players;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.baoyz.swipemenulistview.SwipeMenu;
 import com.baoyz.swipemenulistview.SwipeMenuCreator;
@@ -87,6 +90,7 @@ public class PlayersFragment extends Fragment implements PlayersContract.View {
             }
         });
 
+        //swipe delete
         SwipeMenuCreator creator = new SwipeMenuCreator() {
 
             @Override
@@ -100,9 +104,7 @@ public class PlayersFragment extends Fragment implements PlayersContract.View {
                 menu.addMenuItem(item);
             }
         };
-
         listView.setMenuCreator(creator);
-
         listView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
@@ -117,6 +119,17 @@ public class PlayersFragment extends Fragment implements PlayersContract.View {
             }
         });
 
+        //swipe referesh
+        SwipeRefreshLayout layout = (SwipeRefreshLayout) view.findViewById(R.id.refresh_layout);
+        layout.setEnabled(true);
+        layout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mPresenter.loadPlayers(true);
+            }
+        });
+
+
         root = view;
 
         return view;
@@ -129,16 +142,32 @@ public class PlayersFragment extends Fragment implements PlayersContract.View {
     }
 
     @Override
-    public void showPlayers(List<Player> playerList) {
-        root.findViewById(R.id.no_player_info).setVisibility(View.GONE);
-        root.findViewById(R.id.listview_players).setVisibility(View.VISIBLE);
-        mPlayersAdapter.replaceData(playerList);
+    public void showPlayers(final List<Player> playerList) {
+        Activity activity = getActivity();
+        if (activity == null) return;
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ((SwipeRefreshLayout) root.findViewById(R.id.refresh_layout)).setRefreshing(false);
+                root.findViewById(R.id.no_player_info).setVisibility(View.GONE);
+                root.findViewById(R.id.listview_players).setVisibility(View.VISIBLE);
+                mPlayersAdapter.replaceData(playerList);
+            }
+        });
     }
 
     @Override
     public void showNoPlayer() {
-        root.findViewById(R.id.no_player_info).setVisibility(View.VISIBLE);
-        root.findViewById(R.id.listview_players).setVisibility(View.GONE);
+        Activity activity = getActivity();
+        if (activity == null) return;
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ((SwipeRefreshLayout) root.findViewById(R.id.refresh_layout)).setRefreshing(false);
+                root.findViewById(R.id.no_player_info).setVisibility(View.VISIBLE);
+                root.findViewById(R.id.listview_players).setVisibility(View.GONE);
+            }
+        });
     }
 
     @Override
